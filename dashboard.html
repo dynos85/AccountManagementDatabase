@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management App</title>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9eff5;
+            color: #333;
+            display: flex;
+            flex-direction: column; /* Changed to column to stack sidebar/main-content and footer */
+            min-height: 100vh; /* Ensures the body takes at least the full viewport height */
+        }
+        .content-wrapper { /* New wrapper for sidebar and main-content */
+            display: flex;
+            flex-grow: 1; /* Allows this wrapper to take up available space, pushing footer down */
+            width: 100%; /* Ensure it takes full width */
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sidebar h1 {
+            color: #ecf0f1;
+            font-size: 1.6em;
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 0 15px;
+        }
+        .sidebar .action-buttons {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .sidebar .action-buttons button {
+            background-color: #34495e;
+            color: white;
+            padding: 12px 15px;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sidebar .action-buttons button:hover {
+            background-color: #1abc9c;
+            transform: translateX(5px);
+        }
+        .sidebar .action-buttons .logout-button {
+            background-color: #e74c3c; /* A distinct color for logout */
+            margin-top: 20px; /* Space above logout button */
+            border-bottom: none; /* No bottom border for the last button */
+        }
+        .sidebar .action-buttons .logout-button:hover {
+            background-color: #c0392b;
+            transform: translateX(5px);
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #f4f7fa;
+            border-radius: 8px;
+            margin: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        h2 {
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 10px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select,
+        .form-group input[type="date"],
+        .form-group input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.95em;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #1abc9c;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, 0.25);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .form-actions button {
+            background-color: #1abc9c;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .form-actions button:hover {
+            background-color: #16a085;
+            transform: translateY(-2px);
+        }
+        .hidden {
+            display: none;
+        }
+        .message, .error-message {
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+        }
+        table th, table td {
+            border: 1px solid #e0e6ea;
+            padding: 10px;
+            text-align: left;
+        }
+        table thead {
+            background-color: #34495e;
+            color: white;
+        }
+        table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-inactive {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        #viewAllAccountsFilter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #fcfcfc;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        #viewAllAccountsFilter label {
+            white-space: nowrap;
+            font-weight: bold;
+            color: #555;
+        }
+        #viewAllAccountsFilter select,
+        #viewAllAccountsFilter input[type="password"] {
+            flex-grow: 1;
+            padding: 9px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            max-width: 280px;
+            font-size: 0.95em;
+        }
+        #viewAllAccountsFilter button {
+            background-color: #007bff;
+            color: white;
+            padding: 9px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #viewAllAccountsFilter button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        #allAccountsDisplay {
+            margin-top: 30px;
+            border-top: 1px solid #e0e6ea;
+            padding-top: 25px;
+        }
+        #allAccountsDisplay h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ced4da;
+            padding-bottom: 8px;
+            font-size: 1.4em;
+        }
+        #allAccountsDisplay table {
+            margin-bottom: 20px;
+        }
+        #allAccountsDisplay p {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        footer { /* Added footer styling */
+            margin-top: auto; /* Pushes the footer to the bottom when used with flex-direction: column */
+            padding: 1px;
+            text-align: center;
+            color: #665;
+            font-size: 0.85em;
+            width: 100%; /* Ensure footer spans full width */
+            background-color: #eaf2f8; /* Optional: Add a background to the footer */
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.03); /* Optional: subtle shadow */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .content-wrapper {
+                flex-direction: column; /* Stack sidebar and main content vertically on small screens */
+            }
+            .sidebar {
+                width: 100%;
+                padding: 15px 0;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+            .sidebar h1 {
+                margin-bottom: 20px;
+            }
+            .sidebar .action-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                padding: 0 10px;
+            }
+            .sidebar .action-buttons button {
+                flex-grow: 1;
+                text-align: center;
+                border-bottom: none;
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+                max-width: 180px;
+            }
+            .sidebar .action-buttons button:last-child {
+                border-right: none;
+            }
+            .main-content {
+                margin: 15px;
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1.6em;
+            }
+            .form-group input, .form-group select, .form-group textarea {
+                width: calc(100% - 20px);
+            }
+            #viewAllAccountsFilter {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            #viewAllAccountsFilter select,
+            #viewAllAccountsFilter input[type="password"],
+            #viewAllAccountsFilter button {
+                width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper"> <div class="sidebar">
+            <h1>Account Management</h1>
+            <div class="action-buttons">
+                <button onclick="location.reload();">Home</button> <button onclick="showSection('createAccountForm')">Create New Account</button>
+                <button onclick="showSection('updateAccountForm')">Update Account</button>
+                <button onclick="showSection('recordVisitForm')">Record Visit</button>
+                <button onclick="showSection('closeAccountForm')">Close Account</button>
+                <button onclick="showSection('accountsTable')">View All Accounts</button>
+                <button class="logout-button" onclick="location.href='index.html'">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="messageDisplay" class="message hidden"></div>
+            <div id="errorDisplay" class="error-message hidden"></div>
+
+            <div id="initialAccountsOverview" class="content-section">
+                <h2>Customer Accounts Overview</h2>
+                <div id="accountsOverviewTable"></div>
+            </div>
+
+            <div id="createAccountForm" class="content-section hidden">
+                <h2>Create New Account</h2>
+                <form id="createForm">
+                    <div class="form-group">
+                        <label for="customerName">Customer Name:</label>
+                        <input type="text" id="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State:</label>
+                        <input type="text" id="state">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <textarea id="address"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactName">Contact Name:</label>
+                        <input type="text" id="contactName">
+                    </div>
+                    <div class="form-group">
+                        <label for="designation">Designation:</label>
+                        <input type="text" id="designation">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactNo">Contact No.:</label>
+                        <input type="text" id="contactNo">
+                    </div>
+                    <h3>Monthly Test Loads:</h3>
+                    <div class="form-group">
+                        <label for="biochemistry">Biochemistry:</label>
+                        <input type="number" id="biochemistry" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="microbiology">Microbiology:</label>
+                        <input type="number" id="microbiology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="hematology">Hematology:</label>
+                        <input type="number" id="hematology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="pathology">Pathology:</label>
+                        <input type="number" id="pathology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="molecularBiology">Molecular Biology:</label>
+                        <input type="number" id="molecularBiology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="radiology">Radiology:</label>
+                        <input type="number" id="radiology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="createdBy">Created by:</label>
+                        <input type="text" id="createdBy">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="submitForm('create')">Create Account</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="updateAccountForm" class="content-section hidden">
+                <h2>Update Account</h2>
+                <form id="updateForm">
+                    <div class="form-group">
+                        <label for="updateCustomerName">Select Customer:</label>
+                        <select id="updateCustomerName" required>
+                            <option value="">-- Select Customer --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateContactName">Contact Name:</label>
+                        <input type="text" id="updateContactName">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateDesignation">Designation:</label>
+                        <input type="text" id="updateDesignation">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateContactNo">Contact No.:</label>
+                        <input type="text" id="updateContactNo">
+                    </div>
+                    <h3>Update Monthly Test Loads:</h3>
+                    <div class="form-group">
+                        <label for="updateBiochemistry">Biochemistry:</label>
+                        <input type="number" id="updateBiochemistry" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="microbiology">Microbiology:</label>
+                        <input type="number" id="microbiology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="hematology">Hematology:</label>
+                        <input type="number" id="hematology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="pathology">Pathology:</label>
+                        <input type="number" id="pathology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="molecularBiology">Molecular Biology:</label>
+                        <input type="number" id="molecularBiology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="radiology">Radiology:</label>
+                        <input type="number" id="radiology" value="0">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="submitForm('update')">Update Account</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="recordVisitForm" class="content-section hidden">
+                <h2>Record Visit</h2>
+                <form id="visitForm">
+                    <div class="form-group">
+                        <label for="visitCustomerName">Select Customer:</label>
+                        <select id="visitCustomerName" required>
+                            <option value="">-- Select Customer --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitDate">Date of Visit:</label>
+                        <input type="date" id="visitDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitDetails">Visit Details:</label>
+                        <textarea id="visitDetails"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitedBy">Visited By:</label>
+                        <input type="text" id="visitedBy">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="submitForm('recordVisit')">Record Visit</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="closeAccountForm" class="content-section hidden">
+                <h2>Close Account</h2>
+                <form id="closeForm">
+                    <div class="form-group">
+                        <label for="closeCustomerName">Select Customer to Close:</label>
+                        <select id="closeCustomerName" required>
+                            <option value="">-- Select Customer --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="closureReason">Reason for Closure:</label>
+                        <textarea id="closureReason" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="submitForm('close')">Close Account</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="accountsTable" class="content-section hidden">
+                <h2>All Accounts</h2>
+
+                <div id="viewAllAccountsFilter">
+                    <label for="viewAllAccountsCreatedByDropdown">Created By:</label>
+                    <select id="viewAllAccountsCreatedByDropdown" onchange="filterCustomersByCreator()">
+                        <option value="">-- All --</option>
+                    </select>
+
+                    <label for="viewAllAccountsDropdown">Select Customer:</label>
+                    <select id="viewAllAccountsDropdown">
+                        <option value="">-- Select Customer --</option>
+                    </select>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="viewAccountsPassword">Password:</label>
+                        <input type="password" id="viewAccountsPassword" required>
+                    </div>
+                    <button type="button" onclick="viewSelectedAccountDetails()">View Details</button>
+                </div>
+
+                <div id="allAccountsDisplay" class="hidden">
+                </div>
+
+                <div id="allAccountsTableDisplay" class="hidden">
+                </div>
+            </div>
+
+        </div>
+    </div> <script>
+        // IMPORTANT: Replace with your deployed Google Apps Script Web App URL
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxhV6e_CHzQvjBT9zJ9V-0DinX_S9nzNX2twdzR3299ntyPtrdhwyz1usxwkmpw66BtTQ/exec'; //
+
+        let allAccountsData = []; // Global variable to store all fetched account data
+
+        function showSection(sectionId) {
+            const sections = ['initialAccountsOverview', 'createAccountForm', 'updateAccountForm', 'recordVisitForm', 'closeAccountForm', 'accountsTable']; //
+            sections.forEach(id => { //
+                const element = document.getElementById(id); //
+                if (element) { //
+                    element.classList.add('hidden'); //
+                }
+            });
+
+            const selectedSection = document.getElementById(sectionId); //
+            if (selectedSection) { //
+                selectedSection.classList.remove('hidden'); //
+            }
+
+            // If viewing accounts or showing update/visit/close forms, fetch data
+            if (sectionId === 'accountsTable' || sectionId === 'updateAccountForm' || sectionId === 'recordVisitForm' || sectionId === 'closeAccountForm') { //
+                fetchAccounts(); //
+            }
+            if (sectionId === 'accountsTable') { //
+                populateInitialViewAllAccountsDropdowns(allAccountsData); //
+                document.getElementById('allAccountsDisplay').classList.add('hidden'); //
+                document.getElementById('allAccountsTableDisplay').classList.add('hidden'); //
+                // Clear password field when section is shown
+                document.getElementById('viewAccountsPassword').value = ''; //
+            }
+             // Clear any previous messages when switching sections
+            displayMessage('',''); //
+        }
+
+        function displayMessage(type, message) {
+            const messageDiv = document.getElementById('messageDisplay'); //
+            const errorDiv = document.getElementById('errorDisplay'); //
+
+            messageDiv.classList.add('hidden'); //
+            errorDiv.classList.add('hidden'); //
+
+            if (type === 'success') { //
+                messageDiv.textContent = message; //
+                messageDiv.classList.remove('hidden'); //
+            } else if (type === 'error') { //
+                errorDiv.textContent = message; //
+                errorDiv.classList.remove('hidden'); //
+            }
+            setTimeout(() => { //
+                messageDiv.classList.add('hidden'); //
+                errorDiv.classList.add('hidden'); //
+            }, 5000); //
+        }
+
+        function submitForm(action) {
+            const formData = new FormData(); //
+            formData.append('action', action); //
+
+            let formId; //
+            let requiredFields = []; //
+
+            if (action === 'create') { //
+                formId = 'createForm'; //
+                requiredFields = ['customerName']; //
+                formData.append('customerName', document.getElementById('customerName').value); //
+                formData.append('state', document.getElementById('state').value); //
+                formData.append('address', document.getElementById('address').value); //
+                formData.append('contactName', document.getElementById('contactName').value); //
+                formData.append('designation', document.getElementById('designation').value); //
+                formData.append('contactNo', document.getElementById('contactNo').value); //
+                formData.append('biochemistry', document.getElementById('biochemistry').value); //
+                formData.append('microbiology', document.getElementById('microbiology').value); //
+                formData.append('hematology', document.getElementById('hematology').value); //
+                formData.append('pathology', document.getElementById('pathology').value); //
+                formData.append('molecularBiology', document.getElementById('molecularBiology').value); //
+                formData.append('radiology', document.getElementById('radiology').value); //
+                formData.append('createdBy', document.getElementById('createdBy').value); //
+            } else if (action === 'update') { //
+                formId = 'updateForm'; //
+                requiredFields = ['updateCustomerName']; //
+                formData.append('updateCustomerName', document.getElementById('updateCustomerName').value); //
+                formData.append('updateContactName', document.getElementById('updateContactName').value); //
+                formData.append('updateDesignation', document.getElementById('updateDesignation').value); //
+                formData.append('updateContactNo', document.getElementById('updateContactNo').value); //
+                formData.append('updateBiochemistry', document.getElementById('updateBiochemistry').value); //
+                formData.append('microbiology', document.getElementById('microbiology').value); //
+                formData.append('hematology', document.getElementById('hematology').value); //
+                formData.append('pathology', document.getElementById('pathology').value); //
+                formData.append('molecularBiology', document.getElementById('molecularBiology').value); //
+                formData.append('radiology', document.getElementById('radiology').value); //
+            } else if (action === 'recordVisit') { //
+                formId = 'visitForm'; //
+                requiredFields = ['visitCustomerName', 'visitDate']; //
+                formData.append('visitCustomerName', document.getElementById('visitCustomerName').value); //
+                formData.append('visitDate', document.getElementById('visitDate').value); //
+                formData.append('visitDetails', document.getElementById('visitDetails').value); //
+                formData.append('visitedBy', document.getElementById('visitedBy').value); //
+            } else if (action === 'close') { //
+                formId = 'closeForm'; //
+                requiredFields = ['closeCustomerName', 'closureReason']; //
+                formData.append('closeCustomerName', document.getElementById('closeCustomerName').value); //
+                formData.append('closureReason', document.getElementById('closureReason').value); //
+            }
+
+            // Basic validation
+            for (const field of requiredFields) { //
+                const element = document.getElementById(field); //
+                if (element && !element.value) { //
+                    displayMessage('error', 'Please fill in all required fields.'); //
+                    return; //
+                }
+            }
+
+            fetch(scriptURL, { //
+                method: 'POST', //
+                body: formData //
+            })
+            .then(response => { //
+                if (!response.ok) { //
+                    displayMessage('error', `Server error: ${response.status} ${response.statusText}`); //
+                    throw new Error(`HTTP error! status: ${response.status}`); //
+                }
+                return response.text().then(text => { //
+                    try { //
+                        const data = JSON.parse(text); //
+                        return data; //
+                    } catch (e) { //
+                        return { message: text || 'Operation successful!' }; //
+                    }
+                });
+            })
+            .then(data => { //
+                if (data.message) { //
+                    displayMessage('success', data.message); //
+                    document.getElementById(formId).reset(); //
+                    fetchAccounts(); //
+                } else if (data.error) { //
+                    displayMessage('error', data.error); //
+                }
+            })
+            .catch(error => { //
+                console.error('Error:', error); //
+                displayMessage('error', 'An error occurred. Please try again.'); //
+            });
+        }
+
+        function fetchAccounts() {
+            fetch(scriptURL + '?action=viewAccounts') //
+                .then(response => { //
+                    if (!response.ok) { //
+                        console.error('Network error when fetching accounts:', response.status, response.statusText); //
+                        const allAccountsDisplayDiv = document.getElementById('allAccountsDisplay'); //
+                        if (allAccountsDisplayDiv) { //
+                            allAccountsDisplayDiv.textContent = `Error loading accounts: Network error (Status ${response.status})`; //
+                            allAccountsDisplayDiv.classList.remove('hidden'); //
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`); //
+                    }
+                    return response.json(); //
+                })
+                .then(data => { //
+                    console.log('Data received from server:', data); //
+                    allAccountsData = data; //
+                    populateInitialViewAllAccountsDropdowns(data); //
+                    populateActiveCustomerDropdowns(data); //
+                    displayAccountsOverviewTable(data); // Call to display the overview table
+                })
+                .catch(error => { //
+                    console.error('Error fetching accounts:', error); //
+                    const allAccountsDisplayDiv = document.getElementById('allAccountsDisplay'); //
+                    if (allAccountsDisplayDiv && allAccountsDisplayDiv.textContent.startsWith('Loading')) { //
+                        allAccountsDisplayDiv.textContent = 'Error loading accounts.'; //
+                        allAccountsDisplayDiv.classList.remove('hidden'); //
+                    }
+                });
+        }
+
+        function populateActiveCustomerDropdowns(data) {
+            const activeCustomers = data.filter(account => account.status && account.status.toLowerCase() === 'active'); //
+
+            const updateDropdown = document.getElementById('updateCustomerName'); //
+            const visitDropdown = document.getElementById('visitCustomerName'); //
+            const closeDropdown = document.getElementById('closeCustomerName'); //
+
+            [updateDropdown, visitDropdown, closeDropdown].forEach(dropdown => { //
+                if (dropdown) { //
+                    dropdown.innerHTML = '<option value="">-- Select Customer --</option>'; //
+                    activeCustomers.forEach(account => { //
+                        const option = document.createElement('option'); //
+                        option.value = account.customername; //
+                        option.textContent = account.customername; //
+                        dropdown.appendChild(option); //
+                    });
+                }
+            });
+        }
+
+        function populateInitialViewAllAccountsDropdowns(data) {
+            const createdByDropdown = document.getElementById('viewAllAccountsCreatedByDropdown'); //
+            if (createdByDropdown) { //
+                // Add 'All' option first
+                createdByDropdown.innerHTML = '<option value="">-- All --</option>'; //
+                const createdByNames = [...new Set(data.map(account => account.createdby).filter(Boolean))].sort(); //
+                createdByNames.forEach(name => { //
+                    const option = document.createElement('option'); //
+                    option.value = name; //
+                    option.textContent = name; //
+                    createdByDropdown.appendChild(option); //
+                });
+            }
+
+            const customerDropdown = document.getElementById('viewAllAccountsDropdown'); //
+            if (customerDropdown) { //
+                customerDropdown.innerHTML = '<option value="">-- Select Customer --</option>'; //
+                const customerNames = [...new Set(data.map(account => account.customername))].sort(); //
+                customerNames.forEach(name => { //
+                    const option = document.createElement('option'); //
+                    option.value = name; //
+                    option.textContent = name; //
+                    customerDropdown.appendChild(option); //
+                });
+            }
+        }
+
+        function filterCustomersByCreator() {
+            const selectedCreatedBy = document.getElementById('viewAllAccountsCreatedByDropdown').value; //
+            const customerDropdown = document.getElementById('viewAllAccountsDropdown'); //
+            const displayDiv = document.getElementById('allAccountsDisplay'); //
+
+            customerDropdown.innerHTML = '<option value="">-- Select Customer --</option>'; //
+            displayDiv.innerHTML = ''; //
+            displayDiv.classList.add('hidden'); //
+
+            let customersToDisplay = []; //
+
+            if (selectedCreatedBy) { //
+                const filteredAccounts = allAccountsData.filter(account => account.createdby === selectedCreatedBy); //
+                customersToDisplay = [...new Set(filteredAccounts.map(account => account.customername))].sort(); //
+            } else {
+                customersToDisplay = [...new Set(allAccountsData.map(account => account.customername))].sort(); //
+            }
+
+            customersToDisplay.forEach(name => { //
+                const option = document.createElement('option'); //
+                option.value = name; //
+                option.textContent = name; //
+                customerDropdown.appendChild(option); //
+            });
+            // Clear password field and any previous messages
+            document.getElementById('viewAccountsPassword').value = ''; //
+            displayMessage('',''); // Clear any previous success/error messages
+        }
+
+        function viewSelectedAccountDetails() {
+            const selectedCustomer = document.getElementById('viewAllAccountsDropdown').value; //
+            const selectedCreatedBy = document.getElementById('viewAllAccountsCreatedByDropdown').value; //
+            const password = document.getElementById('viewAccountsPassword').value; //
+            const displayDiv = document.getElementById('allAccountsDisplay'); //
+            const tableContainer = document.getElementById('allAccountsTableDisplay'); // This variable is not used but kept for context
+
+            displayDiv.innerHTML = ''; // Clear previous display
+            displayDiv.classList.add('hidden'); //
+            // tableContainer.classList.add('hidden'); // This line is not needed as tableContainer is not used
+
+            // Clear any previous messages before new validation/display
+            displayMessage('',''); //
+
+            // Scenario 1: Manager access to ALL accounts
+            if (selectedCreatedBy === '' && selectedCustomer === '' && password === 'manager@123') { //
+                displayAllAccountsWithDetails(allAccountsData); //
+                displayMessage('success', 'Manager access granted. Displaying all accounts.'); //
+                return; //
+            }
+
+            // Scenario 2: If a specific customer is selected AND created by is blank AND password is manager@123
+            // This is the specific case you want to allow for managers to view individual customer details
+            if (selectedCreatedBy === '' && selectedCustomer !== '' && password === 'manager@123') { //
+                // Proceed to fetch/display specific customer data. The existing fetch logic below will handle this.
+                // No explicit client-side error message needed here if the manager password is correct.
+            } else if (selectedCreatedBy !== '' && selectedCustomer === '') { //
+                 // Error if Created By is selected but Customer is not
+                displayMessage('error', 'Please select a Customer when "Created By" is chosen.'); //
+                return; //
+            } else if (!password) { //
+                // Error if password is empty
+                displayMessage('error', 'Please enter a password.'); //
+                return; //
+            } else if (selectedCreatedBy === '' && selectedCustomer !== '' && password !== 'manager@123') { //
+                 // Error if Created By is blank, Customer is selected, but password is not manager@123
+                 displayMessage('error', 'Incorrect password for viewing specific customer details (manager access required).'); //
+                 return; //
+            } else if (selectedCreatedBy !== '' && selectedCustomer !== '' && !password) { //
+                 // This condition is already covered by !password above, but good to be explicit
+                 displayMessage('error', 'Please enter a password.'); //
+                 return; //
+            }
+
+
+            // Original fetch logic (modified for clarity based on scenarios)
+            const formData = new FormData(); //
+            formData.append('action', 'verifyUserAndFetchAccounts'); //
+            formData.append('username', selectedCreatedBy === '' ? 'All' : selectedCreatedBy); // 'All' for manager or specific user
+            formData.append('password', password); //
+            formData.append('customerName', selectedCustomer); // Pass selected customer name
+
+            fetch(scriptURL, { //
+                method: 'POST', //
+                body: formData //
+            })
+            .then(response => { //
+                if (!response.ok) { //
+                    displayMessage('error', `Server error: ${response.status} ${response.statusText}`); //
+                    throw new Error(`HTTP error! status: ${response.status}`); //
+                }
+                return response.json(); // Expect JSON response
+            })
+            .then(data => { //
+                if (data.authenticated) { //
+                    let authenticatedAccounts = allAccountsData; //
+
+                    // Filter by customer name if selected
+                    if (selectedCustomer !== '') { //
+                        authenticatedAccounts = authenticatedAccounts.filter(account => //
+                            account.customername === selectedCustomer //
+                        );
+                    }
+
+                    // Further filter by createdBy if a specific user is selected (not 'All' manager access)
+                    if (selectedCreatedBy !== '') { //
+                        authenticatedAccounts = authenticatedAccounts.filter(account => //
+                            account.createdby === selectedCreatedBy //
+                        );
+                    }
+
+                    if (authenticatedAccounts.length > 0) { //
+                        displayDiv.classList.remove('hidden'); //
+                        let detailsHTML = ''; //
+
+                        authenticatedAccounts.forEach(account => { //
+                            detailsHTML += `
+                                <h3>${account.customername} Details</h3>
+                                <p><strong>State:</strong> ${account.state || 'N/A'}</p>
+                                <p><strong>Address:</strong> ${account.address || 'N/A'}</p>
+                                <p><strong>Contact Name:</strong> ${account.contactname || 'N/A'}</p>
+                                <p><strong>Designation:</strong> ${account.designation || 'N/A'}</p>
+                                <p><strong>Contact No.:</strong> ${account.contactno || 'N/A'}</p>
+                                <p><strong>Monthly Test Loads:</strong></p>
+                                <table>
+                                    <thead>
+                                        <tr><th>Biochemistry</th><th>Microbiology</th><th>Hematology</th><th>Pathology</th><th>Molecular Biology</th><th>Radiology</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>${account.biochemistry || '0'}</td>
+                                            <td>${account.microbiology || '0'}</td>
+                                            <td>${account.hematology || '0'}</td>
+                                            <td>${account.pathology || '0'}</td>
+                                            <td>${account.molecularbiology || '0'}</td>
+                                            <td>${account.radiology || '0'}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h4>Visit History</h4>
+                                ${account.visits && account.visits.length > 0 ? `
+                                    <table>
+                                        <thead>
+                                            <tr><th>Date</th><th>Details</th><th>Visited By</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            ${account.visits.map(visit => {
+                                                const visitDate = new Date(visit.date);
+                                                const formattedDate = visitDate.toLocaleDateString('en-CA');
+                                                return `<tr><td>${formattedDate || 'N/A'}</td><td>${visit.details || 'N/A'}</td><td>${visit.visitedby || 'N/A'}</td></tr>`;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                ` : '<p>No visit history recorded.</p>'}
+                                <p><strong>Status:</strong> <span class="${account.status && account.status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive'}">${account.status || 'Active'}</span></p>
+                                <p><strong>Created By:</strong> ${account.createdby || 'N/A'}</p>
+                                <hr> `;
+                        });
+                        displayDiv.innerHTML = detailsHTML; //
+                        displayMessage('success', 'Authentication successful. Displaying details.'); //
+                    } else {
+                        displayMessage('error', 'No account found for the selected criteria.'); //
+                    }
+                } else {
+                    displayMessage('error', data.message || 'Authentication failed. Wrong password or user.'); //
+                }
+            })
+            .catch(error => { //
+                console.error('Error during authentication or data fetch:', error); //
+                displayMessage('error', 'An error occurred during authentication. Please try again.'); //
+            });
+        }
+
+        function displayAllAccountsWithDetails(accounts) {
+            const displayDiv = document.getElementById('allAccountsDisplay'); //
+            displayDiv.innerHTML = ''; //
+            displayDiv.classList.remove('hidden'); //
+
+            if (accounts.length === 0) { //
+                displayDiv.innerHTML = '<p>No accounts available.</p>'; //
+                return; //
+            }
+
+            let allDetailsHTML = ''; //
+            accounts.forEach(account => { //
+                allDetailsHTML += `
+                    <h3>${account.customername} Details</h3>
+                    <p><strong>State:</strong> ${account.state || 'N/A'}</p>
+                    <p><strong>Address:</strong> ${account.address || 'N/A'}</p>
+                    <p><strong>Contact Name:</strong> ${account.contactname || 'N/A'}</p>
+                    <p><strong>Designation:</strong> ${account.designation || 'N/A'}</p>
+                    <p><strong>Contact No.:</strong> ${account.contactno || 'N/A'}</p>
+                    <p><strong>Monthly Test Loads:</strong></p>
+                    <table>
+                        <thead>
+                            <tr><th>Biochemistry</th><th>Microbiology</th><th>Hematology</th><th>Pathology</th><th>Molecular Biology</th><th>Radiology</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${account.biochemistry || '0'}</td>
+                                <td>${account.microbiology || '0'}</td>
+                                <td>${account.hematology || '0'}</td>
+                                <td>${account.pathology || '0'}</td>
+                                <td>${account.molecularbiology || '0'}</td>
+                                <td>${account.radiology || '0'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <h4>Visit History</h4>
+                    ${account.visits && account.visits.length > 0 ? `
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Details</th><th>Visited By</th></tr>
+                            </thead>
+                            <tbody>
+                                ${account.visits.map(visit => {
+                                    const visitDate = new Date(visit.date);
+                                    const formattedDate = visitDate.toLocaleDateString('en-CA');
+                                    return `<tr><td>${formattedDate || 'N/A'}</td><td>${visit.details || 'N/A'}</td><td>${visit.visitedby || 'N/A'}</td></tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    ` : '<p>No visit history recorded.</p>'}
+                    <p><strong>Status:</strong> <span class="${account.status && account.status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive'}">${account.status || 'Active'}</span></p>
+                    <p><strong>Created By:</strong> ${account.createdby || 'N/A'}</p>
+                    <hr>
+                `;
+            });
+            displayDiv.innerHTML = allDetailsHTML; //
+        }
+
+        function displayAccountsOverviewTable(accounts) {
+            const overviewDiv = document.getElementById('accountsOverviewTable'); //
+            overviewDiv.innerHTML = ''; // Clear previous content
+
+            if (!accounts || accounts.length === 0) { //
+                overviewDiv.innerHTML = '<p>No accounts available.</p>'; //
+                return; //
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            accounts.forEach(account => { //
+                const statusClass = account.status && account.status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive'; //
+                tableHTML += `
+                    <tr>
+                        <td>${account.customername || 'N/A'}</td>
+                        <td class="${statusClass}">${account.status || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            overviewDiv.innerHTML = tableHTML; //
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { //
+            // Check if the user is "logged in" (this would be a server-side check in a real app)
+            // For this client-side example, assume direct access to dashboard.html means success.
+            // In a real scenario, the login page would set a session variable or local storage flag.
+            // If not logged in, redirect to login.html
+            // For now, we'll just show the initial overview.
+            showSection('initialAccountsOverview'); // Show the new overview section by default
+            fetchAccounts(); //
+        });
+    </script>
+<footer>
+<p>&copy; 2025 Developed by Subhadeep.S</p>
+</footer>
+</body>
+</html>

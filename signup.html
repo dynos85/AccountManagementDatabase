@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Account Management App</title>
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e9eff5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .signup-container {
+            background-color: #f4f7fa;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 10px;
+            display: inline-block;
+            width: auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.95em;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus {
+            border-color: #1abc9c;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, 0.25);
+        }
+        .form-actions button {
+            background-color: #1abc9c;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .form-actions button:hover {
+            background-color: #16a085;
+            transform: translateY(-2px);
+        }
+        .links {
+            margin-top: 20px;
+        }
+        .links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.9em;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .message, .error-message {
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95em;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none; /* Hidden by default */
+        }
+        .message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h2>Sign Up for an Account</h2>
+        <div id="messageDisplay" class="message"></div>
+        <div id="errorDisplay" class="error-message"></div>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="newUsername">Username:</label>
+                <input type="text" id="newUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Password:</label>
+                <input type="password" id="newPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="handleSignup()">Sign Up</button>
+            </div>
+        </form>
+        <div class="links">
+            <a href="index.html">Back to Login</a>
+        </div>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxhV6e_CHzQvjBT9zJ9V-0DinX_S9nzNX2twdzR3299ntyPtrdhwyz1usxwkmpw66BtTQ/exec'; // Replace with your Apps Script URL
+
+        function displayMessage(type, message) {
+            const messageDiv = document.getElementById('messageDisplay');
+            const errorDiv = document.getElementById('errorDisplay');
+
+            messageDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+
+            if (type === 'success') {
+                messageDiv.textContent = message;
+                messageDiv.style.display = 'block';
+            } else if (type === 'error') {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function handleSignup() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!username || !password || !confirmPassword) {
+                displayMessage('error', 'All fields are required.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                displayMessage('error', 'Passwords do not match.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'signup');
+            formData.append('username', username);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayMessage('success', data.message || 'Account created successfully!');
+                    document.getElementById('signupForm').reset();
+                    // Optionally redirect to login page after successful signup
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    displayMessage('error', data.message || 'Failed to create account.');
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                displayMessage('error', 'An error occurred during signup. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
