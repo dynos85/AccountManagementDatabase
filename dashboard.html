@@ -303,6 +303,57 @@
             font-weight: 300;
         }
 
+        /* Styles for Find Prospect section */
+        #findProspectForm .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        #findProspectForm .filter-group .form-group {
+            margin-bottom: 0; /* Remove extra margin */
+        }
+
+        #prospectResults {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        #prospectResults .customer-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #prospectResults .customer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        #prospectResults .customer-card h4 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 8px;
+        }
+        #prospectResults .customer-card p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        #prospectResults .customer-card p strong {
+            color: #333;
+        }
+
+
         /* Responsive adjustments */
         @media (max-width: 992px) { /* Adjust breakpoint for larger tablets */
             .content-wrapper {
@@ -364,6 +415,9 @@
                 width: 100%;
                 max-width: none;
             }
+            #findProspectForm .filter-group {
+                grid-template-columns: 1fr; /* Stack filters on smaller screens */
+            }
             footer {
                 padding: 2px;
             }
@@ -424,7 +478,7 @@
                 <button onclick="showSection('closeAccountForm')">Close Account</button>
                 <button onclick="showSection('accountsTable')">View All Accounts</button>
                 <button onclick="showSection('retrieveVisitsForm')">Retrieve Visits</button>
-                <button class="logout-button" onclick="location.href='index.html'">Logout</button>
+                <button onclick="showSection('findProspectForm')">Find a  Prospect</button> <button class="logout-button" onclick="location.href='index.html'">Logout</button>
             </div>
         </div>
 
@@ -490,6 +544,30 @@
                         <input type="number" id="radiology" value="0">
                     </div>
                     <div class="form-group">
+                        <label for="instrumentBiochemistry">Biochemistry Instrument Type:</label>
+                        <select id="instrumentBiochemistry">
+                            <option value="">-- Select --</option>
+                            <option value="Semi-Auto">Semi-Auto</option>
+                            <option value="Full-Auto">Full-Auto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="instrumentHematology">Hematology Instrument Type:</label>
+                        <select id="instrumentHematology">
+                            <option value="">-- Select --</option>
+                            <option value="3-Part">3-Part</option>
+                            <option value="5-Part">5-Part</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="instrumentImmunology">Immunology Instrument Type:</label>
+                        <select id="instrumentImmunology">
+                            <option value="">-- Select --</option>
+                            <option value="ELISA">ELISA</option>
+                            <option value="CLIA">CLIA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="createdBy">Created by:</label>
                         <input type="text" id="createdBy">
                     </div>
@@ -544,6 +622,30 @@
                     <div class="form-group">
                         <label for="updateRadiology">Radiology:</label>
                         <input type="number" id="updateRadiology" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateInstrumentBiochemistry">Biochemistry Instrument Type:</label>
+                        <select id="updateInstrumentBiochemistry">
+                            <option value="">-- Select --</option>
+                            <option value="Semi-Auto">Semi-Auto</option>
+                            <option value="Full-Auto">Full-Auto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateInstrumentHematology">Hematology Instrument Type:</label>
+                        <select id="updateInstrumentHematology">
+                            <option value="">-- Select --</option>
+                            <option value="3-Part">3-Part</option>
+                            <option value="5-Part">5-Part</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateInstrumentImmunology">Immunology Instrument Type:</label>
+                        <select id="updateInstrumentImmunology">
+                            <option value="">-- Select --</option>
+                            <option value="ELISA">ELISA</option>
+                            <option value="CLIA">CLIA</option>
+                        </select>
                     </div>
                     <div class="form-actions">
                         <button type="button" onclick="submitForm('update')">Update Account</button>
@@ -647,16 +749,72 @@
                     </div>
             </div>
 
+            <div id="findProspectForm" class="content-section hidden">
+                <h2>Find Prospect</h2>
+                <div class="filter-group">
+                    <div class="form-group">
+                        <label for="filterBiochemistry">Biochemistry:</label>
+                        <input type="number" id="filterBiochemistry" value="" oninput="filterProspects()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterMicrobiology">Microbiology:</label>
+                        <input type="number" id="filterMicrobiology" value="" oninput="filterProspects()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterHematology">Hematology:</label>
+                        <input type="number" id="filterHematology" value="" oninput="filterProspects()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterPathology">Pathology:</label>
+                        <input type="number" id="filterPathology" value="" oninput="filterProspects()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterMolecularBiology">Molecular Biology:</label>
+                        <input type="number" id="filterMolecularBiology" value="" oninput="filterProspects()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterRadiology">Radiology:</label>
+                        <input type="number" id="filterRadiology" value="" oninput="filterProspects()">
+                    </div>
+                    <div class="form-group">
+                        <label for="filterInstrumentBiochemistry">Biochemistry Instrument Type:</label>
+                        <select id="filterInstrumentBiochemistry" onchange="filterProspects()">
+                            <option value="">-- All --</option>
+                            <option value="Semi-Auto">Semi-Auto</option>
+                            <option value="Full-Auto">Full-Auto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterInstrumentHematology">Hematology Instrument Type:</label>
+                        <select id="filterInstrumentHematology" onchange="filterProspects()">
+                            <option value="">-- All --</option>
+                            <option value="3-Part">3-Part</option>
+                            <option value="5-Part">5-Part</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterInstrumentImmunology">Immunology Instrument Type:</label>
+                        <select id="filterInstrumentImmunology" onchange="filterProspects()">
+                            <option value="">-- All --</option>
+                            <option value="ELISA">ELISA</option>
+                            <option value="CLIA">CLIA</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="prospectResults">
+                    </div>
+            </div>
+
         </div>
     </div>
     <script>
         // IMPORTANT: Replace with your deployed Google Apps Script Web App URL
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbw1DgOJ3o7g45kUjdshl5jP53bXkC4OBkWIFim5fKSX9ks1jbxgOursTU3oW1bE7myR/exec'; //
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxcLzMFjSh1F8Z9NWz_vi2Nfu2ZlM4CRfyF1bcqmfGfiDVJnUAA6r_CeOQhbQQMNkkI9Q/exec'; //
 
         let allAccountsData = []; // Global variable to store all fetched account data
 
         function showSection(sectionId) {
-            const sections = ['initialAccountsOverview', 'createAccountForm', 'updateAccountForm', 'recordVisitForm', 'closeAccountForm', 'accountsTable', 'retrieveVisitsForm']; //
+            const sections = ['initialAccountsOverview', 'createAccountForm', 'updateAccountForm', 'recordVisitForm', 'closeAccountForm', 'accountsTable', 'retrieveVisitsForm', 'findProspectForm']; // Added 'findProspectForm'
             sections.forEach(id => { //
                 const element = document.getElementById(id); //
                 if (element) { //
@@ -669,8 +827,8 @@
                 selectedSection.classList.remove('hidden'); //
             }
 
-            // If viewing accounts or showing update/visit/close forms, fetch data
-            if (sectionId === 'accountsTable' || sectionId === 'updateAccountForm' || sectionId === 'recordVisitForm' || sectionId === 'closeAccountForm') { //
+            // If viewing accounts or showing update/visit/close/findProspect forms, fetch data
+            if (sectionId === 'accountsTable' || sectionId === 'updateAccountForm' || sectionId === 'recordVisitForm' || sectionId === 'closeAccountForm' || sectionId === 'findProspectForm') { //
                 fetchAccounts(); //
             }
             if (sectionId === 'accountsTable') { //
@@ -680,8 +838,11 @@
                 // Clear password field when section is shown
                 document.getElementById('viewAccountsPassword').value = ''; //
             }
-             // Clear any previous messages when switching sections
+            // Clear any previous messages when switching sections
             displayMessage('',''); //
+            if (sectionId === 'findProspectForm') {
+                filterProspects(); // Initial display when the section is shown
+            }
         }
 
         function displayMessage(type, message) {
@@ -726,6 +887,9 @@
                 formData.append('pathology', document.getElementById('pathology').value); //
                 formData.append('molecularBiology', document.getElementById('molecularBiology').value); //
                 formData.append('radiology', document.getElementById('radiology').value); //
+		formData.append('instrumentBiochemistry', document.getElementById('instrumentBiochemistry').value);
+                formData.append('instrumentHematology', document.getElementById('instrumentHematology').value);
+                formData.append('instrumentImmunology', document.getElementById('instrumentImmunology').value);
                 formData.append('createdBy', document.getElementById('createdBy').value); //
             } else if (action === 'update') { //
                 formId = 'updateForm'; //
@@ -740,6 +904,10 @@
                 formData.append('pathology', document.getElementById('updatePathology').value); //
                 formData.append('molecularBiology', document.getElementById('updateMolecularBiology').value); //
                 formData.append('radiology', document.getElementById('updateRadiology').value); //
+                // NEW: Append instrument type values for update
+                formData.append('instrumentBiochemistry', document.getElementById('updateInstrumentBiochemistry').value);
+                formData.append('instrumentHematology', document.getElementById('updateInstrumentHematology').value);
+                formData.append('instrumentImmunology', document.getElementById('updateInstrumentImmunology').value);
             } else if (action === 'recordVisit') { //
                 formId = 'visitForm'; //
                 requiredFields = ['visitCustomerName', 'visitDate']; //
@@ -829,6 +997,7 @@
                     populateInitialViewAllAccountsDropdowns(data); //
                     populateActiveCustomerDropdowns(data); //
                     displayAccountsOverviewTable(data); // Call to display the overview table
+                    filterProspects(); // Re-run prospect filter if on that section
                 })
                 .catch(error => { //
                     console.error('Error fetching accounts:', error); //
@@ -907,6 +1076,10 @@
                 document.getElementById('updatePathology').value = account.pathology || 0; //
                 document.getElementById('updateMolecularBiology').value = account.molecularbiology || 0; //
                 document.getElementById('updateRadiology').value = account.radiology || 0; //
+                // NEW: Populate instrument type dropdowns
+                document.getElementById('updateInstrumentBiochemistry').value = account.biochemistryinstrumenttype || '';
+                document.getElementById('updateInstrumentHematology').value = account.hematologyinstrumenttype || '';
+                document.getElementById('updateInstrumentImmunology').value = account.immunologyinstrumenttype || '';
             } else {
                 // Clear fields if no account is selected or found
                 document.getElementById('updateContactName').value = ''; //
@@ -918,6 +1091,10 @@
                 document.getElementById('updatePathology').value = 0; //
                 document.getElementById('updateMolecularBiology').value = 0; //
                 document.getElementById('updateRadiology').value = 0; //
+                // NEW: Clear instrument type dropdowns
+                document.getElementById('updateInstrumentBiochemistry').value = '';
+                document.getElementById('updateInstrumentHematology').value = '';
+                document.getElementById('updateInstrumentImmunology').value = '';
             }
         }
 
@@ -1059,6 +1236,10 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                <h4>Instrument Types:</h4>
+                                <p><strong>Biochemistry:</strong> ${account.biochemistryinstrumenttype || 'N/A'}</p>
+                                <p><strong>Hematology:</strong> ${account.hematologyinstrumenttype || 'N/A'}</p>
+                                <p><strong>Immunology:</strong> ${account.immunologyinstrumenttype || 'N/A'}</p>
                                 <h4>Visit History</h4>
                                 ${account.visits && account.visits.length > 0 ? `
                                     <table>
@@ -1128,6 +1309,10 @@
                             </tr>
                         </tbody>
                     </table>
+                    <h4>Instrument Types:</h4>
+                    <p><strong>Biochemistry:</strong> ${account.biochemistryinstrumenttype || 'N/A'}</p>
+                    <p><strong>Hematology:</strong> ${account.hematologyinstrumenttype || 'N/A'}</p>
+                    <p><strong>Immunology:</strong> ${account.immunologyinstrumenttype || 'N/A'}</p>
                     <h4>Visit History</h4>
                     ${account.visits && account.visits.length > 0 ? `
                         <table>
@@ -1151,6 +1336,49 @@
             displayDiv.innerHTML = allDetailsHTML; //
         }
 
+        function displayRetrievedVisitsTable(visits) {
+            const retrievedVisitsDisplayDiv = document.getElementById('retrievedVisitsDisplay');
+            retrievedVisitsDisplayDiv.innerHTML = ''; // Clear previous content
+
+            if (!visits || visits.length === 0) {
+                retrievedVisitsDisplayDiv.innerHTML = '<p>No visit records found for the selected dates.</p>';
+                return;
+            }
+
+            let tableHTML = `
+                <h3>Visit Details</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Date of Visit</th>
+                            <th>Details</th>
+                            <th>Visited By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            visits.forEach(visit => {
+                const visitDate = new Date(visit.date);
+                const formattedDate = visitDate.toLocaleDateString('en-CA');
+                tableHTML += `
+                    <tr>
+                        <td>${visit.customername || 'N/A'}</td>
+                        <td>${formattedDate || 'N/A'}</td>
+                        <td>${visit.details || 'N/A'}</td>
+                        <td>${visit.visitedby || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            retrievedVisitsDisplayDiv.innerHTML = tableHTML;
+        }
+
         function displayAccountsOverviewTable(accounts) {
             const overviewDiv = document.getElementById('accountsOverviewTable'); //
             overviewDiv.innerHTML = ''; // Clear previous content
@@ -1165,6 +1393,7 @@
                     <thead>
                         <tr>
                             <th>Customer Name</th>
+                            <th>State</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -1176,6 +1405,7 @@
                 tableHTML += `
                     <tr>
                         <td>${account.customername || 'N/A'}</td>
+			<td>${account.state || 'N/A'}</td>
                         <td class="${statusClass}">${account.status || 'N/A'}</td>
                     </tr>
                 `;
@@ -1188,48 +1418,83 @@
             overviewDiv.innerHTML = tableHTML; //
         }
 
-        function displayRetrievedVisitsTable(visits) {
-    const retrievedVisitsDisplayDiv = document.getElementById('retrievedVisitsDisplay');
-    retrievedVisitsDisplayDiv.innerHTML = ''; // Clear previous content
+        // New function to filter prospects
+        function filterProspects() {
+            const filterBiochemistry = parseInt(document.getElementById('filterBiochemistry').value) || 0;
+            const filterMicrobiology = parseInt(document.getElementById('filterMicrobiology').value) || 0;
+            const filterHematology = parseInt(document.getElementById('filterHematology').value) || 0;
+            const filterPathology = parseInt(document.getElementById('filterPathology').value) || 0;
+            const filterMolecularBiology = parseInt(document.getElementById('filterMolecularBiology').value) || 0;
+            const filterRadiology = parseInt(document.getElementById('filterRadiology').value) || 0;
+            const filterInstrumentBiochemistry = document.getElementById('filterInstrumentBiochemistry').value;
+            const filterInstrumentHematology = document.getElementById('filterInstrumentHematology').value;
+            const filterInstrumentImmunology = document.getElementById('filterInstrumentImmunology').value;
 
-    if (!visits || visits.length === 0) {
-        retrievedVisitsDisplayDiv.innerHTML = '<p>No visit records found for the selected dates.</p>';
-        return;
-    }
+            const prospectResultsDiv = document.getElementById('prospectResults');
+            prospectResultsDiv.innerHTML = ''; // Clear previous results
 
-    let tableHTML = `
-        <h3>Visit Details</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Customer Name</th>
-                    <th>Date of Visit</th>
-                    <th>Details</th>
-                    <th>Visited By</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+            let filteredProspects = allAccountsData.filter(account => {
+                let match = true;
 
-    visits.forEach(visit => {
-        const visitDate = new Date(visit.date);
-        const formattedDate = visitDate.toLocaleDateString('en-CA');
-        tableHTML += `
-            <tr>
-                <td>${visit.customername || 'N/A'}</td>
-                <td>${formattedDate || 'N/A'}</td>
-                <td>${visit.details || 'N/A'}</td>
-                <td>${visit.visitedby || 'N/A'}</td>
-            </tr>
-        `;
-    });
+                // Filter by monthly test loads (greater than or equal to entered value)
+                if (filterBiochemistry > 0 && (parseInt(account.biochemistry) || 0) < filterBiochemistry) match = false;
+                if (filterMicrobiology > 0 && (parseInt(account.microbiology) || 0) < filterMicrobiology) match = false;
+                if (filterHematology > 0 && (parseInt(account.hematology) || 0) < filterHematology) match = false;
+                if (filterPathology > 0 && (parseInt(account.pathology) || 0) < filterPathology) match = false;
+                if (filterMolecularBiology > 0 && (parseInt(account.molecularbiology) || 0) < filterMolecularBiology) match = false;
+                if (filterRadiology > 0 && (parseInt(account.radiology) || 0) < filterRadiology) match = false;
 
-    tableHTML += `
-            </tbody>
-        </table>
-    `;
-    retrievedVisitsDisplayDiv.innerHTML = tableHTML;
-}
+                // Filter by instrument types (exact match)
+                if (filterInstrumentBiochemistry && account.biochemistryinstrumenttype !== filterInstrumentBiochemistry) match = false;
+                if (filterInstrumentHematology && account.hematologyinstrumenttype !== filterInstrumentHematology) match = false;
+                if (filterInstrumentImmunology && account.immunologyinstrumenttype !== filterInstrumentImmunology) match = false;
+
+                // Only show active accounts as prospects
+                if (account.status && account.status.toLowerCase() !== 'active') match = false;
+
+                return match;
+            });
+
+            if (filteredProspects.length > 0) {
+                let resultsHTML = `
+                    <h3>Matching Prospects:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>State</th>
+                                <th>Address</th>
+                                <th>Biochemistry Instrument</th>
+                                <th>Hematology Instrument</th>
+                                <th>Immunology Instrument</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                filteredProspects.forEach(prospect => {
+                    resultsHTML += `
+                        <tr>
+                            <td>${prospect.customername || 'N/A'}</td>
+                            <td>${prospect.state || 'N/A'}</td>
+                            <td>${prospect.address || 'N/A'}</td>
+                            <td>${prospect.biochemistryinstrumenttype || 'N/A'}</td>
+                            <td>${prospect.hematologyinstrumenttype || 'N/A'}</td>
+                            <td>${prospect.immunologyinstrumenttype || 'N/A'}</td>
+                        </tr>
+                    `;
+                });
+
+                resultsHTML += `
+                        </tbody>
+                    </table>
+                `;
+                prospectResultsDiv.innerHTML = resultsHTML;
+            } else {
+                prospectResultsDiv.innerHTML = '<p>No prospects found matching the criteria.</p>';
+            }
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => { //
             // Check if the user is "logged in" (this would be a server-side check in a real app)
